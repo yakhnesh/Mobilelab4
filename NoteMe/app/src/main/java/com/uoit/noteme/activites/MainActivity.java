@@ -1,27 +1,35 @@
 package com.uoit.noteme.activites;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.uoit.noteme.R;
 import com.uoit.noteme.adapters.NotesAdapter;
 import com.uoit.noteme.database.NotesDatabase;
 import com.uoit.noteme.entities.Note;
 import com.uoit.noteme.listeners.NotesListener;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,9 +92,31 @@ public class MainActivity extends AppCompatActivity implements  NotesListener{
             @Override
             public void onClick(View view) {
                 // Place button action to import code here
-                
+            Gson gson = new Gson();
+                Type type = new TypeToken<List<Note>>(){}.getType();
+                String nodeJson = gson.toJson(noteList, type);
+                writetoStorage(getApplicationContext(),"JNote.Json",nodeJson);
+                Toast.makeText(MainActivity.this,"done",Toast.LENGTH_SHORT).show();
             }
         });
+
+    }
+
+    public void writetoStorage(Context context, String filename, String jsonContent){
+        File file = new File(context.getExternalFilesDir(null), filename);
+        if(!file.exists()) {
+            file.mkdir();
+        }
+        try{
+            File mfile = new File(file, filename);
+            FileWriter writer = new FileWriter(mfile);
+            writer.append(jsonContent);
+            writer.flush();
+            writer.close();
+
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
